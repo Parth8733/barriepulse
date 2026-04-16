@@ -7,6 +7,15 @@ export interface CachedData<T> {
 }
 
 // Weather types
+export interface ForecastDay {
+  date: string;
+  dayName: string;
+  high: number;
+  low: number;
+  condition: string;
+  iconCode: string;
+}
+
 export interface WeatherData {
   temperature: number;
   feelsLike: number;
@@ -20,6 +29,7 @@ export interface WeatherData {
   tomorrowCondition: string;
   tomorrowHigh: number;
   tomorrowLow: number;
+  forecast?: ForecastDay[];
 }
 
 export interface AirQualityData {

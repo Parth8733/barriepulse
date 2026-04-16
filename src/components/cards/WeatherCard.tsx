@@ -1,12 +1,13 @@
 "use client";
 
-import { Cloud, CloudRain, Sun, CloudSnow, CloudFog, CloudLightning } from "lucide-react";
+import { useState } from "react";
+import { Cloud, CloudRain, Sun, CloudSnow, CloudFog, CloudLightning, ChevronDown, ChevronUp } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import type { WeatherData, CachedData, CardId } from "@/types";
 
 function getWeatherIcon(condition: string) {
   const c = condition.toLowerCase();
-  if (c.includes("rain") || c.includes("shower")) return CloudRain;
+  if (c.includes("rain") || c.includes("shower") || c.includes("drizzle")) return CloudRain;
   if (c.includes("snow") || c.includes("flurr")) return CloudSnow;
   if (c.includes("fog") || c.includes("mist") || c.includes("haze")) return CloudFog;
   if (c.includes("thunder") || c.includes("storm")) return CloudLightning;
@@ -23,6 +24,7 @@ interface WeatherCardProps {
 }
 
 export function WeatherCard({ data, isLoading, error, isPinned, onTogglePin }: WeatherCardProps) {
+  const [showForecast, setShowForecast] = useState(false);
   const Icon = data ? getWeatherIcon(data.data.condition) : Cloud;
 
   return (
@@ -35,7 +37,6 @@ export function WeatherCard({ data, isLoading, error, isPinned, onTogglePin }: W
       onTogglePin={onTogglePin}
       isLoading={isLoading}
       error={error}
-      footerLink={{ label: "7-day forecast", href: "https://weather.gc.ca/city/pages/on-151_metric_e.html" }}
     >
       {data && (
         <div>
@@ -58,6 +59,38 @@ export function WeatherCard({ data, isLoading, error, isPinned, onTogglePin }: W
               {data.data.tomorrowCondition} tomorrow · {data.data.tomorrowHigh}°/{data.data.tomorrowLow}°
             </p>
           </div>
+
+          {/* 7-day forecast toggle */}
+          {data.data.forecast && data.data.forecast.length > 0 && (
+            <div className="mt-3">
+              <button
+                onClick={() => setShowForecast(!showForecast)}
+                className="flex items-center gap-1 text-xs text-primary hover:text-primary-dim transition-colors cursor-pointer"
+              >
+                7-day forecast
+                {showForecast ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+
+              {showForecast && (
+                <div className="mt-2 space-y-1.5">
+                  {data.data.forecast.map((day) => {
+                    const DayIcon = getWeatherIcon(day.condition);
+                    return (
+                      <div key={day.date} className="flex items-center justify-between text-sm">
+                        <span className="w-12 font-medium">{day.dayName}</span>
+                        <DayIcon className="w-4 h-4 text-muted shrink-0" />
+                        <span className="flex-1 text-xs text-muted text-center truncate px-1">{day.condition}</span>
+                        <span className="text-right whitespace-nowrap">
+                          <span className="font-medium">{day.high}°</span>
+                          <span className="text-muted"> / {day.low}°</span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Card>
